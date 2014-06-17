@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Exam < ActiveRecord::Base do
+describe ActiveRecord::Base do
   describe 'обладает связями с другими моделями:' do
     it 'с предметом' do
       expect belong_to(:subject)
