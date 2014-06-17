@@ -22,4 +22,5 @@ describe Exam do
       expect have_many(:marks)
     end
   end
+  
 end
