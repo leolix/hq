@@ -54,6 +54,11 @@ gem 'dotenv-rails'
 # gem 'tiny_tds'
 #gem 'activerecord-sqlserver-adapter'
 
+gem 'httparty'
+gem 'sidekiq'
+gem 'sidetiq'
+gem 'sinatra', require: nil
+
 group :production do
   gem 'skylight'
 end
@@ -74,6 +79,7 @@ group :development do
   gem 'letter_opener'
   gem 'bullet'
   gem 'meta_request'
+  gem 'capistrano-sidekiq'
 end
 
 group :test do

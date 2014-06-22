@@ -1,4 +1,19 @@
 HQ::Application.routes.draw do
+  require 'sidekiq/web'
+  authenticate :user, lambda { |u| u.is?(:developer) } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
+
+  require 'sidekiq/api'
+  get 'queue-status' => proc {
+    [200, { 'Content-Type' => 'text/plain' },
+     [Sidekiq::Queue.new.size < 20000 ? 'OK' : 'UHOH' ]]
+  }
+  get 'queue-latency' => proc {
+    [200, { 'Content-Type' => 'text/plain' },
+     [Sidekiq::Queue.new.latency < 30 ? 'OK' : 'UHOH' ]]
+  }
+
   # Выпуски (группы выпускников).
   resources :graduates do
     get 'students', on: :member
@@ -7,6 +22,7 @@ HQ::Application.routes.draw do
   end
 
   resources :blanks
+  resources :directions
 
   devise_for :users, controllers: { registrations: 'users' }
     as :user do
@@ -181,6 +197,7 @@ HQ::Application.routes.draw do
 
   namespace :office do
     resources :orders do
+      get '/', to: 'orders#show', defaults: { format: 'pdf' }, as: :show
       get 'drafts', to: 'orders#drafts', on: :collection
       get 'underways', to: 'orders#underways', on: :collection
     end
@@ -256,6 +273,28 @@ HQ::Application.routes.draw do
   get '/ajax/group_students' => 'ajax#group_students'
   get '/ajax/group_exams' => 'ajax#group_exams'
   get '/ajax/orderstudent' => 'ajax#orderstudent'
+
+
+
+  namespace :entrance do
+    resources :campaigns do
+      get 'applications', on: :member
+      get 'register',     on: :member
+
+      resources :dates
+      resources :entrants do
+        resources :exam_results
+        resources :applications do
+          get '/print.pdf', to: 'applications#print', on: :member, defaults: { format: 'pdf' }, as: :print
+          get '/print_all.pdf', to: 'applications#print_all', on: :collection, defaults: { format: 'pdf' }, as: :print_all
+        end
+      end
+    end
+
+    get 'fis/test' => 'fis#test'
+  end
+
+
 
   root to: 'dashboard#index'
 

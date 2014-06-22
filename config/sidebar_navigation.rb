@@ -5,6 +5,9 @@ SimpleNavigation::Configuration.run do |navigation|
     primary.dom_id = 'dashboard-menu'
     primary.dom_class = 'nav nav-pills nav-stacked'
 
+    primary.item :actual_events, 'Актуальные события', actual_events_path,
+                 icon: 'calendar'
+
 
     if user_signed_in?
       if current_user.is?(:developer)
@@ -13,15 +16,37 @@ SimpleNavigation::Configuration.run do |navigation|
 
       primary.item :user_rating,
         '<span class="glyphicons podium"></span> Отчёт об эффективности'.html_safe,
-        rating_user_path(current_user)
+                   rating_user_path(current_user)
 
       if current_user.is?(:subdepartment) || current_user.is?(:dean)
         primary.item :users_department,
-          '<span class="glyphicons group"></span> Подразделение'.html_safe,
-          department_users_path
+                     '<span class="glyphicons group"></span> Подразделение'.html_safe,
+                     department_users_path
       end
     end
-    primary.item :actual_events, 'Актуальные события', actual_events_path, icon: 'calendar'
+
+    primary.item :nav_group_entrance, 'Приёмная кампания',
+                 class: 'nav-header disabled'
+
+    primary.item :entrance_campaign_applications,
+                 '<span class="glyphicons notes_2"></span> Поданные заявления'.html_safe,
+                 applications_entrance_campaign_path(Entrance::Campaign::CURRENT)
+
+    if user_signed_in?
+      if can?(:register, Entrance::Campaign)
+        primary.item :entrance_campaign_register,
+                     '<span class="glyphicons notes_2"></span> Регистрационный журнал'.html_safe,
+                     register_entrance_campaign_path(Entrance::Campaign::CURRENT)
+      end
+
+      if can?(:manage, Entrance::Entrant)
+        primary.item :new_entrance_application, 'Абитуриенты',
+                     entrance_campaign_entrants_path(Entrance::Campaign::CURRENT)
+      end
+
+      primary.item :entrance_dates, 'Сроки проведения',
+                   entrance_campaign_dates_path(Entrance::Campaign::CURRENT)
+    end
 
     # ======================================
     primary.item :nav_group_study, 'Учёба', class: 'nav-header disabled'

@@ -90,6 +90,8 @@ class Ability
     can :manage, EventDate
     can :actual, :events
     can :create, EventDateClaim
+
+    can :applications, Entrance::Campaign
   end
 
   # Обычный преподаватель.
@@ -185,5 +187,12 @@ class Ability
     can :manage, Study::Discipline
     can :manage, Study::Exam
     can :manage, Study::Repeat
+  end
+
+  def selection(user)
+    can :manage, Entrance::Campaign
+    can :manage, Entrance::Entrant
+    can :manage, Entrance::ExamResult
+    can :manage, Entrance::Application
   end
 end
